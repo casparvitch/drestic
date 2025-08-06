@@ -1,0 +1,13 @@
+[Unit]
+Description=Restic Weekly Repository Integrity Check
+Wants=network-online.target
+After=network.target network-online.target
+
+[Service]
+Type=oneshot
+# ExecStart path will be replaced by setup.sh during installation
+ExecStart=/path/to/be/replaced/restic_check.sh
+# Environment variable will be set by setup.sh based on scope
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,6 @@
+.env
+.aider.*
+venv/*
+.aider*
+/tests/tmp/
+old_code/
