@@ -54,10 +54,10 @@ Clone and setup (for user install)
    make install-deps
    
    # OR manual installation if make install-deps doesn't work:
-   # Ubuntu/Debian: sudo apt install rclone curl git restic
-   # RHEL/CentOS:   sudo yum install rclone curl git && sudo yum install restic
-   # Arch Linux:    sudo pacman -S rclone curl git restic
-   # openSUSE:      sudo zypper install rclone curl git restic
+   # Ubuntu/Debian: sudo apt install curl git restic unzip && curl https://rclone.org/install.sh | sudo bash
+   # RHEL/CentOS:   sudo yum install curl git unzip && sudo yum install restic && curl https://rclone.org/install.sh | sudo bash
+   # Arch Linux:    sudo pacman -S curl git restic unzip && curl https://rclone.org/install.sh | sudo bash
+   # openSUSE:      sudo zypper install curl git restic unzip && curl https://rclone.org/install.sh | sudo bash
 
    make setup-user
    
@@ -245,6 +245,13 @@ make status-system
 Test rclone connection:
 ```
 rclone ls backup_remote:
+```
+
+**Rclone "mega backend not found" error:**
+Your rclone installation lacks MEGA support. Install the official version:
+```bash
+curl https://rclone.org/install.sh | sudo bash
+# Then verify: rclone help backends | grep mega
 ```
 
 **Missing files in backup:**

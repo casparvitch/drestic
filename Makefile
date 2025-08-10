@@ -42,16 +42,16 @@ clean:
 # Install dependencies for the project
 install-deps:
 	@echo "--- Installing Dependencies ---"
-	@echo "Checking for package manager..."
+	@echo "Installing basic dependencies..."
 	@if command -v apt >/dev/null 2>&1; then \
 		echo "Using apt package manager"; \
 		sudo apt update; \
-		sudo apt install -y rclone curl git restic shellcheck shfmt; \
-		echo "✓ System dependencies installed"; \
+		sudo apt install -y curl git restic shellcheck shfmt unzip; \
+		echo "✓ Basic dependencies installed"; \
 	elif command -v yum >/dev/null 2>&1; then \
 		echo "Using yum package manager"; \
-		sudo yum install -y rclone curl git ShellCheck; \
-		echo "✓ System dependencies installed (note: shfmt may need manual installation)"; \
+		sudo yum install -y curl git ShellCheck unzip; \
+		echo "✓ Basic dependencies installed (note: shfmt may need manual installation)"; \
 		echo "Installing restic separately..."; \
 		if ! command -v restic >/dev/null 2>&1; then \
 			wget -q https://github.com/restic/restic/releases/latest/download/restic_*_linux_amd64.bz2 -O /tmp/restic.bz2; \
@@ -62,16 +62,31 @@ install-deps:
 		fi; \
 	elif command -v pacman >/dev/null 2>&1; then \
 		echo "Using pacman package manager"; \
-		sudo pacman -S --noconfirm rclone curl git restic shellcheck shfmt; \
-		echo "✓ System dependencies installed"; \
+		sudo pacman -S --noconfirm curl git restic shellcheck shfmt unzip; \
+		echo "✓ Basic dependencies installed"; \
 	elif command -v zypper >/dev/null 2>&1; then \
 		echo "Using zypper package manager"; \
-		sudo zypper install -y rclone curl git restic ShellCheck shfmt; \
-		echo "✓ System dependencies installed"; \
+		sudo zypper install -y curl git restic ShellCheck shfmt unzip; \
+		echo "✓ Basic dependencies installed"; \
 	else \
 		echo "❌ No supported package manager found (apt/yum/pacman/zypper)"; \
-		echo "Please install manually: rclone curl git restic shellcheck shfmt"; \
+		echo "Please install manually: curl git restic shellcheck shfmt unzip"; \
 		exit 1; \
+	fi
+	@echo "--- Installing Official Rclone (with MEGA support) ---"
+	@if command -v rclone >/dev/null 2>&1; then \
+		echo "Checking if rclone supports MEGA backend..."; \
+		if rclone help backends | grep -q mega; then \
+			echo "✓ Rclone with MEGA support already installed"; \
+		else \
+			echo "⚠ Rclone found but lacks MEGA support. Installing official version..."; \
+			curl -s https://rclone.org/install.sh | sudo bash; \
+			echo "✓ Official rclone installed"; \
+		fi; \
+	else \
+		echo "Installing official rclone with all backends..."; \
+		curl -s https://rclone.org/install.sh | sudo bash; \
+		echo "✓ Official rclone installed"; \
 	fi
 	@echo "--- Installing Restic (if not already installed) ---"
 	@if ! command -v restic >/dev/null 2>&1; then \
