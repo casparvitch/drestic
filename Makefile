@@ -222,8 +222,8 @@ test-remote-gotify:
 	else \
 		echo "Sending test notification to $$GOTIFY_URL..."; \
 		if curl -sS "$$GOTIFY_URL/message?token=$$GOTIFY_TOKEN" \
-			-F "title=DRestic Test" \
-			-F "message=This is a test notification from your DRestic backup system at $$(date)" \
+			-F "title=DRestic Test ($$(hostname))" \
+			-F "message=This is a test notification from your DRestic backup system on $$(hostname) at $$(date)" \
 			-F "priority=5" >/dev/null 2>&1; then \
 			echo "✓ Test notification sent successfully!"; \
 			echo "Check your Gotify server/app for the test message."; \
