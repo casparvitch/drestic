@@ -51,10 +51,7 @@ DRestic is an automated backup system (using restic & mega) for Linux that provi
    make install-deps
    
    # OR manual installation if make install-deps doesn't work:
-   # Ubuntu/Debian: sudo apt install rclone curl git restic
-   # RHEL/CentOS:   sudo yum install rclone curl git
-   # Arch Linux:    sudo pacman -S rclone curl git restic
-   # openSUSE:      sudo zypper install rclone curl git restic
+   # install rclone curl git restic with your package manager
    ```
 
 2. Clone and setup (for user install)
@@ -248,7 +245,7 @@ make test-local
 
 This requires bats-core to be installed.
 
-Run the (w remote) test suite:
+Run the (w remote) test suite (takes a while):
 ```
 make test-remote
 ```
