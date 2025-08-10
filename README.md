@@ -47,20 +47,12 @@ DRestic is an automated backup system (using restic & mega) for Linux that provi
 
 1. Install dependencies:
    ```
-   sudo apt install rclone curl git
+   sudo apt install rclone curl git restic
    ```
 
-2. Install restic:
+2. Clone and setup (for user install)
    ```
-   wget https://github.com/restic/restic/releases/latest/download/restic_*_linux_amd64.bz2
-   bunzip2 restic_*_linux_amd64.bz2
-   chmod +x restic_*_linux_amd64
-   sudo mv restic_*_linux_amd64 /usr/local/bin/restic
-   ```
-
-3. Clone and setup:
-   ```
-   git clone <repository-url>
+   git clone https://github.com/casparvitch/drestic
    cd drestic
    chmod +x setup.sh
    ./setup.sh --scope=user
