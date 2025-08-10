@@ -26,7 +26,7 @@ notify() {
 
 # --- Exit Trap ---
 # This will call notify with the script's final exit code upon termination.
-trap 'notify "Restic Backup" "Restic backup script finished with exit code $?" $?' EXIT
+trap 'notify "Restic Backup ($(hostname))" "Restic backup script finished with exit code $?" $?' EXIT
 
 # --- Main Backup Logic ---
 echo "--- Starting Restic Backup at $(date) ---"

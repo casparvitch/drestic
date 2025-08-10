@@ -40,8 +40,8 @@ if [ -n "$GOTIFY_URL" ]; then
     if [ -n "$GOTIFY_TOKEN" ]; then
         echo "Testing Gotify token..."
         if curl -sS "$GOTIFY_URL/message?token=$GOTIFY_TOKEN" \
-            -F "title=DRestic Config Test" \
-            -F "message=Testing Gotify configuration - you can ignore this message" \
+            -F "title=DRestic Config Test ($(hostname))" \
+            -F "message=Testing Gotify configuration from $(hostname) - you can ignore this message" \
             -F "priority=1" >/dev/null 2>&1; then
             echo "✓ Test notification sent successfully!"
         else
