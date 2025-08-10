@@ -54,7 +54,10 @@ Clone and setup (for user install)
    make install-deps
    
    # OR manual installation if make install-deps doesn't work:
-   # install rclone curl git restic with your package manager
+   # Ubuntu/Debian: sudo apt install rclone curl git restic
+   # RHEL/CentOS:   sudo yum install rclone curl git && sudo yum install restic
+   # Arch Linux:    sudo pacman -S rclone curl git restic
+   # openSUSE:      sudo zypper install rclone curl git restic
 
    make setup-user
    
@@ -89,6 +92,10 @@ You should see at least one snapshot listed.
 **For system scope installations**, use `make status-system`, `make backup-now-system`, and `make snapshots-system` instead.
 
 **Available commands:** Run `make help` to see all available operations.
+
+**Check configuration:** Run `make validate-config` to verify your setup.
+
+**View recent logs:** Run `make logs` (user) or `make logs-system` (system) for recent backup activity.
 
 ## Recovery (When You Need Your Files Back)
 
@@ -200,14 +207,26 @@ make status-system
 
 ### Notifications
 
-Optional Gotify push notifications can be configured during setup. Edit the environment file to change settings:
+Optional Gotify push notifications can be configured during setup or updated later:
 
+**Update Gotify settings (recommended):**
+```bash
+make update-gotify
 ```
+
+**Manual configuration:**
+Edit the environment file to change settings:
+```bash
 # User scope
 nano ~/.config/restic/env
 
 # System scope
 sudo nano /root/.restic_env
+```
+
+Test notifications with:
+```bash
+make test-remote-gotify
 ```
 
 ### Troubleshooting

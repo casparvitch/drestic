@@ -1,4 +1,4 @@
-.PHONY: all test-local format lint clean help test-remote test-remote-setup test-remote-run test-remote-verify test-remote-teardown test-remote-clean setup-user setup-system backup-now backup-now-system check-now check-now-system status status-system snapshots snapshots-system recover uninstall-user uninstall-system
+.PHONY: all test-local format lint clean help test-remote test-remote-setup test-remote-run test-remote-verify test-remote-teardown test-remote-clean setup-user setup-system backup-now backup-now-system check-now check-now-system status status-system snapshots snapshots-system recover uninstall-user uninstall-system update-gotify update-gotify-user update-gotify-system validate-config logs logs-system mount-backup mount-backup-system config
 
 # Default target
 all: test-local
@@ -46,26 +46,34 @@ install-deps:
 	@if command -v apt >/dev/null 2>&1; then \
 		echo "Using apt package manager"; \
 		sudo apt update; \
-		sudo apt install -y rclone curl git shellcheck shfmt; \
+		sudo apt install -y rclone curl git restic shellcheck shfmt; \
 		echo "✓ System dependencies installed"; \
 	elif command -v yum >/dev/null 2>&1; then \
 		echo "Using yum package manager"; \
 		sudo yum install -y rclone curl git ShellCheck; \
 		echo "✓ System dependencies installed (note: shfmt may need manual installation)"; \
+		echo "Installing restic separately..."; \
+		if ! command -v restic >/dev/null 2>&1; then \
+			wget -q https://github.com/restic/restic/releases/latest/download/restic_*_linux_amd64.bz2 -O /tmp/restic.bz2; \
+			bunzip2 /tmp/restic.bz2; \
+			chmod +x /tmp/restic; \
+			sudo mv /tmp/restic /usr/local/bin/restic; \
+			echo "✓ Restic installed"; \
+		fi; \
 	elif command -v pacman >/dev/null 2>&1; then \
 		echo "Using pacman package manager"; \
-		sudo pacman -S --noconfirm rclone curl git shellcheck shfmt; \
+		sudo pacman -S --noconfirm rclone curl git restic shellcheck shfmt; \
 		echo "✓ System dependencies installed"; \
 	elif command -v zypper >/dev/null 2>&1; then \
 		echo "Using zypper package manager"; \
-		sudo zypper install -y rclone curl git ShellCheck shfmt; \
+		sudo zypper install -y rclone curl git restic ShellCheck shfmt; \
 		echo "✓ System dependencies installed"; \
 	else \
 		echo "❌ No supported package manager found (apt/yum/pacman/zypper)"; \
-		echo "Please install manually: rclone curl git shellcheck shfmt"; \
+		echo "Please install manually: rclone curl git restic shellcheck shfmt"; \
 		exit 1; \
 	fi
-	@echo "--- Installing Restic ---"
+	@echo "--- Installing Restic (if not already installed) ---"
 	@if ! command -v restic >/dev/null 2>&1; then \
 		echo "Downloading and installing restic..."; \
 		wget -q https://github.com/restic/restic/releases/latest/download/restic_*_linux_amd64.bz2 -O /tmp/restic.bz2; \
@@ -87,7 +95,7 @@ install-deps:
 		echo "✓ Bats already installed"; \
 	fi
 	@echo "--- Dependencies Installation Complete ---"
-	@echo "You can now run: make test"
+	@echo "You can now run: make test-local"
 
 # check-config target removed as validate_config.sh is deprecated/removed
 # and its functionality is now inline or simplified.
@@ -299,6 +307,144 @@ uninstall-user:
 uninstall-system:
 	@./uninstall_system.sh
 
+update-gotify:
+	@echo "=== Update Gotify Configuration ==="
+	@if [ -f ~/.config/restic/env ]; then \
+		echo "Updating user scope Gotify settings..."; \
+		./update_gotify.sh ~/.config/restic/env; \
+	elif [ -f /root/.restic_env ]; then \
+		echo "Updating system scope Gotify settings..."; \
+		sudo ./update_gotify.sh /root/.restic_env; \
+	else \
+		echo "Error: No DRestic installation found. Run 'make setup-user' or 'make setup-system' first."; \
+		exit 1; \
+	fi
+
+update-gotify-user:
+	@./update_gotify.sh ~/.config/restic/env
+
+update-gotify-system:
+	@sudo ./update_gotify.sh /root/.restic_env
+
+validate-config:
+	@echo "=== DRestic Configuration Validation ==="
+	@if [ -f ~/.config/restic/env ]; then \
+		echo "✓ User scope configuration found"; \
+		echo "Checking user configuration..."; \
+		if [ -f ~/.config/restic/password ] && [ -s ~/.config/restic/password ]; then \
+			echo "✓ Password file exists and is not empty"; \
+		else \
+			echo "✗ Password file missing or empty: ~/.config/restic/password"; \
+		fi; \
+		if [ -f ~/.config/restic/paths ] && [ -s ~/.config/restic/paths ]; then \
+			echo "✓ Paths file exists and is not empty"; \
+		else \
+			echo "✗ Paths file missing or empty: ~/.config/restic/paths"; \
+		fi; \
+		if [ -f ~/.config/restic/excludes ]; then \
+			echo "✓ Excludes file exists"; \
+		else \
+			echo "⚠ Excludes file missing (optional): ~/.config/restic/excludes"; \
+		fi; \
+		echo "Testing rclone connection..."; \
+		if timeout 30 rclone ls backup_remote: >/dev/null 2>&1; then \
+			echo "✓ Rclone connection successful"; \
+		else \
+			echo "✗ Rclone connection failed"; \
+		fi; \
+	elif [ -f /root/.restic_env ]; then \
+		echo "✓ System scope configuration found"; \
+		echo "Checking system configuration..."; \
+		if sudo [ -f /root/.restic_password ] && sudo [ -s /root/.restic_password ]; then \
+			echo "✓ Password file exists and is not empty"; \
+		else \
+			echo "✗ Password file missing or empty: /root/.restic_password"; \
+		fi; \
+		if sudo [ -f /etc/restic/paths ] && sudo [ -s /etc/restic/paths ]; then \
+			echo "✓ Paths file exists and is not empty"; \
+		else \
+			echo "✗ Paths file missing or empty: /etc/restic/paths"; \
+		fi; \
+		if sudo [ -f /etc/restic/excludes ]; then \
+			echo "✓ Excludes file exists"; \
+		else \
+			echo "⚠ Excludes file missing (optional): /etc/restic/excludes"; \
+		fi; \
+		echo "Testing rclone connection..."; \
+		if timeout 30 rclone ls backup_remote: >/dev/null 2>&1; then \
+			echo "✓ Rclone connection successful"; \
+		else \
+			echo "✗ Rclone connection failed"; \
+		fi; \
+	else \
+		echo "✗ No DRestic configuration found"; \
+		echo "Run 'make setup-user' or 'make setup-system' first"; \
+		exit 1; \
+	fi
+
+logs:
+	@echo "=== Recent User Backup Logs ==="
+	@journalctl --user -u restic-backup.service --since "7 days ago" --no-pager || echo "No recent backup logs found"
+
+logs-system:
+	@echo "=== Recent System Backup Logs ==="
+	@sudo journalctl -u restic-backup.service --since "7 days ago" --no-pager || echo "No recent backup logs found"
+
+mount-backup:
+	@echo "=== Mount User Backup ==="
+	@if [ -f ~/.config/restic/env ]; then \
+		echo "Creating mount point: ~/restore"; \
+		mkdir -p ~/restore; \
+		echo "Mounting backup repository..."; \
+		echo "Run this command:"; \
+		echo "RESTIC_PASSWORD_FILE=~/.config/restic/password restic mount ~/restore --repo rclone:backup_remote:/restic_backups"; \
+		echo ""; \
+		echo "Browse files in ~/restore/snapshots/latest/"; \
+		echo "When done, unmount with: umount ~/restore"; \
+	else \
+		echo "Error: User configuration not found. Run 'make setup-user' first."; \
+		exit 1; \
+	fi
+
+mount-backup-system:
+	@echo "=== Mount System Backup ==="
+	@if [ -f /root/.restic_env ]; then \
+		echo "Creating mount point: ~/restore"; \
+		mkdir -p ~/restore; \
+		echo "Mounting backup repository..."; \
+		echo "Run this command:"; \
+		echo "sudo RESTIC_PASSWORD_FILE=/root/.restic_password restic mount ~/restore --repo rclone:backup_remote:/restic_backups"; \
+		echo ""; \
+		echo "Browse files in ~/restore/snapshots/latest/"; \
+		echo "When done, unmount with: umount ~/restore"; \
+	else \
+		echo "Error: System configuration not found. Run 'make setup-system' first."; \
+		exit 1; \
+	fi
+
+config:
+	@echo "=== DRestic Configuration Status ==="
+	@if [ -f ~/.config/restic/env ]; then \
+		echo "User scope configuration:"; \
+		echo "  Config directory: ~/.config/restic/"; \
+		echo "  Password file: ~/.config/restic/password"; \
+		echo "  Environment file: ~/.config/restic/env"; \
+		echo "  Paths file: ~/.config/restic/paths"; \
+		echo "  Excludes file: ~/.config/restic/excludes"; \
+		echo "  Timer status: $$(systemctl --user is-active restic-backup.timer 2>/dev/null || echo 'inactive')"; \
+	elif [ -f /root/.restic_env ]; then \
+		echo "System scope configuration:"; \
+		echo "  Config directory: /etc/restic/"; \
+		echo "  Password file: /root/.restic_password"; \
+		echo "  Environment file: /root/.restic_env"; \
+		echo "  Paths file: /etc/restic/paths"; \
+		echo "  Excludes file: /etc/restic/excludes"; \
+		echo "  Timer status: $$(sudo systemctl is-active restic-backup.timer 2>/dev/null || echo 'inactive')"; \
+	else \
+		echo "No DRestic configuration found."; \
+		echo "Run 'make setup-user' or 'make setup-system' to get started."; \
+	fi
+
 help:
 	@echo "Available targets:"
 	@echo ""
@@ -316,6 +462,15 @@ help:
 	@echo "  uninstall-user   : Uninstall user scope DRestic"
 	@echo "  uninstall-system : Uninstall system scope DRestic"
 	@echo "  recover          : Show recovery instructions"
+	@echo "  update-gotify    : Update Gotify notification settings (auto-detects scope)"
+	@echo "  update-gotify-user   : Update Gotify settings for user scope"
+	@echo "  update-gotify-system : Update Gotify settings for system scope"
+	@echo "  validate-config  : Validate DRestic configuration and connectivity"
+	@echo "  logs             : Show recent user backup logs"
+	@echo "  logs-system      : Show recent system backup logs"
+	@echo "  mount-backup     : Show commands to mount user backup as filesystem"
+	@echo "  mount-backup-system : Show commands to mount system backup as filesystem"
+	@echo "  config           : Show current configuration status and paths"
 	@echo ""
 	@echo "Testing:"
 	@echo "  test-local           : Runs all (fully-local) Bats tests"
