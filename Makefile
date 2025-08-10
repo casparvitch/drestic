@@ -279,6 +279,10 @@ snapshots:
 		. ~/.config/restic/env && \
 		env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" && \
 		echo "" && \
+		echo "Snapshot sizes:" && \
+		env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" --json | \
+		jq -r '.[] | "\(.short_id): \(if .summary.total_size then (.summary.total_size | if . > 1073741824 then "\(. / 1073741824 * 100 | floor / 100) GB" elif . > 1048576 then "\(. / 1048576 * 100 | floor / 100) MB" else "\(. / 1024 * 100 | floor / 100) KB" end) else "calculating..." end)"' && \
+		echo "" && \
 		echo "Repository statistics:" && \
 		env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic stats --repo "$$RESTIC_REPOSITORY"; \
 	else \
@@ -289,7 +293,7 @@ snapshots:
 snapshots-system:
 	@echo "Listing system backup snapshots..."
 	@if sudo [ -f /root/.restic_env ]; then \
-		sudo bash -c '. /root/.restic_env && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" && echo "" && echo "Repository statistics:" && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic stats --repo "$$RESTIC_REPOSITORY"'; \
+		sudo bash -c '. /root/.restic_env && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" && echo "" && echo "Snapshot sizes:" && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" --json | jq -r ".[] | \"\(.short_id): \(if .summary.total_size then (.summary.total_size | if . > 1073741824 then \\\"\(. / 1073741824 * 100 | floor / 100) GB\\\" elif . > 1048576 then \\\"\(. / 1048576 * 100 | floor / 100) MB\\\" else \\\"\(. / 1024 * 100 | floor / 100) KB\\\" end) else \\\"calculating...\\\" end)\"" && echo "" && echo "Repository statistics:" && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic stats --repo "$$RESTIC_REPOSITORY"'; \
 	else \
 		echo "Error: System restic not configured. Run 'make setup-system' first."; \
 		exit 1; \
