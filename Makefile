@@ -285,7 +285,7 @@ snapshots:
 
 snapshots-system:
 	@echo "Listing system backup snapshots..."
-	@if [ -f /root/.restic_env ]; then \
+	@if sudo [ -f /root/.restic_env ]; then \
 		sudo bash -c '. /root/.restic_env && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY"'; \
 	else \
 		echo "Error: System restic not configured. Run 'make setup-system' first."; \
