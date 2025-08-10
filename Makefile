@@ -138,7 +138,9 @@ test-remote-setup:
 	@echo "Copying Restic environment file to test config: ~/.config/restic-test/env"
 	@cp ~/.config/restic/env ~/.config/restic-test/
 	@echo "Updating CONFIG_DIR in test environment file to point to test config"
-	@sed -i 's|CONFIG_DIR=.*|CONFIG_DIR="$$HOME/.config/restic-test"|' ~/.config/restic-test/env
+	@sed -i 's|CONFIG_DIR=.*|CONFIG_DIR="$$HOME/.config/restic-test"|' ~/.config/restic-test/env && \
+	echo "Copying Gotify settings from main config to test config..." && \
+	grep -E "^GOTIFY_(URL|TOKEN)=" ~/.config/restic/env >> ~/.config/restic-test/env || true
 	@echo "Creating test data files in /tmp/drestic-test-data..."
 	@echo "Test file 1 - $$(date)" > /tmp/drestic-test-data/file1.txt
 	@echo "Test file 2 - $$(date)" > /tmp/drestic-test-data/file2.txt
@@ -226,7 +228,7 @@ test-remote-gotify:
 			echo "✓ Test notification sent successfully!"; \
 			echo "Check your Gotify server/app for the test message."; \
 		else \
-			echo "✗ Failed to send notification. Check your GOTIFY_URL and GOTIFY_TOKEN."; \
+			echo "✗ Failed to send notification. Check your GOTIFY_URL and $$GOTIFY_TOKEN."; \
 		fi; \
 	fi
 
