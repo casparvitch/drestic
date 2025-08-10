@@ -46,16 +46,25 @@ DRestic is an automated backup system (using restic & mega) for Linux that provi
 ## Quick Start
 
 1. Install dependencies:
-   ```
-   sudo apt install rclone curl git restic
+   ```bash
+   # Automatic installation (supports apt, yum, pacman, zypper)
+   make install-deps
+   
+   # OR manual installation if make install-deps doesn't work:
+   # Ubuntu/Debian: sudo apt install rclone curl git restic
+   # RHEL/CentOS:   sudo yum install rclone curl git
+   # Arch Linux:    sudo pacman -S rclone curl git restic
+   # openSUSE:      sudo zypper install rclone curl git restic
    ```
 
 2. Clone and setup (for user install)
-   ```
+   ```bash
    git clone https://github.com/casparvitch/drestic
    cd drestic
-   chmod +x setup.sh
-   ./setup.sh --scope=user
+   make setup-user
+   
+   # OR for system-wide install:
+   # make setup-system
    ```
 
 The setup script will prompt for your MEGA credentials and Restic repository password. **Store these securely** - they are required for backup recovery.
@@ -64,55 +73,66 @@ The setup script will prompt for your MEGA credentials and Restic repository pas
 
 After setup, check that everything is running:
 
-1. **Check timer status:**
-   ```
-   systemctl --user status restic-backup.timer
-   ```
-
-2. **Run a backup:**
-   ```
-   systemctl --user start restic-backup.service
+1. **Check timer status and recent logs:**
+   ```bash
+   make status
    ```
 
-3. **Watch the backup progress:**
-   ```
-   journalctl --user -fu restic-backup.service
+2. **Run a backup now:**
+   ```bash
+   make backup-now
+   # Then monitor progress with: journalctl --user -fu restic-backup.service
    ```
 
-4. **Verify backup completed successfully:**
-   ```
-   RESTIC_PASSWORD_FILE=~/.config/restic/password restic snapshots --repo rclone:backup_remote:/restic_backups
+3. **List your backup snapshots:**
+   ```bash
+   make snapshots
    ```
 
 You should see at least one snapshot listed.
+
+**For system scope installations**, use `make status-system`, `make backup-now-system`, and `make snapshots-system` instead.
+
+**Available commands:** Run `make help` to see all available operations.
 
 ## Recovery (When You Need Your Files Back)
 
 ### Quick File Recovery
 
-**List what's available:**
+**Get recovery instructions:**
+```bash
+make recover
 ```
-RESTIC_PASSWORD_FILE=~/.config/restic/password restic snapshots --repo rclone:backup_remote:/restic_backups
+
+**List available snapshots:**
+```bash
+# User scope
+make snapshots
+
+# System scope  
+make snapshots-system
 ```
 
 **Browse backups like a folder:**
-```
+```bash
 mkdir ~/restore
+# User scope
 RESTIC_PASSWORD_FILE=~/.config/restic/password restic mount ~/restore --repo rclone:backup_remote:/restic_backups
+# System scope
+sudo RESTIC_PASSWORD_FILE=/root/.restic_password restic mount ~/restore --repo rclone:backup_remote:/restic_backups
+
 # Browse files in ~/restore, then unmount:
 umount ~/restore
 ```
 
 **Restore specific files:**
-```
+```bash
+# User scope
 RESTIC_PASSWORD_FILE=~/.config/restic/password restic restore latest --target /tmp/restore --path /home/user/Documents --repo rclone:backup_remote:/restic_backups
+
+# System scope
+sudo RESTIC_PASSWORD_FILE=/root/.restic_password restic restore latest --target /tmp/restore --path /home/user/Documents --repo rclone:backup_remote:/restic_backups
 ```
-
-### System Recovery Commands
-
-For system scope installations, prefix commands with `sudo` and use:
-- Password file: `/root/.restic_password`
-- Repository: `rclone:backup_remote:/restic_backups`
 
 ## Customization
 
@@ -173,12 +193,12 @@ Backups run automatically:
 - **Automatic cleanup** of old snapshots (keeps 7 daily, 4 weekly, 6 monthly, 6 yearly)
 
 Check status:
-```
+```bash
 # User scope
-systemctl --user status restic-backup.timer
+make status
 
 # System scope
-sudo systemctl status restic-backup.timer
+make status-system
 ```
 
 ## Advanced Topics
@@ -199,9 +219,12 @@ sudo nano /root/.restic_env
 
 **Backup not running:**
 Check timer status and logs:
-```
-systemctl --user status restic-backup.timer
-journalctl --user -u restic-backup.service
+```bash
+# User scope
+make status
+
+# System scope  
+make status-system
 ```
 
 **Cannot access repository:**
