@@ -1,4 +1,4 @@
-.PHONY: all test-local format lint clean help test-remote test-remote-setup test-remote-run test-remote-verify test-remote-teardown test-remote-clean setup-user setup-system backup-now backup-now-system check-now check-now-system status status-system snapshots snapshots-system recover uninstall-user uninstall-system update-gotify update-gotify-user update-gotify-system validate-config logs logs-system mount-backup mount-backup-system config
+.PHONY: all test-local format lint clean help test-remote test-remote-setup test-remote-run test-remote-verify test-remote-teardown test-remote-clean setup-user setup-system backup-now backup-now-system check-now check-now-system status status-system snapshots snapshots-system recover uninstall-user uninstall-system update-gotify update-gotify-user update-gotify-system validate-config logs logs-system mount-backup mount-backup-system config test-update-gotify
 
 # Default target
 all: test-local
@@ -346,6 +346,15 @@ update-gotify-user:
 update-gotify-system:
 	@sudo ./update_gotify.sh /root/.restic_env
 
+# New target for updating Gotify settings in the test environment
+test-update-gotify:
+	@echo "=== Update Gotify Configuration for Test Environment ==="
+	@if [ ! -f ~/.config/restic-test/env ]; then \
+		echo "Error: Test environment not set up. Run 'make test-remote-setup' first."; \
+		exit 1; \
+	fi
+	@./update_gotify.sh ~/.config/restic-test/env
+
 validate-config:
 	@echo "=== DRestic Configuration Validation ==="
 	@if [ -f ~/.config/restic/env ]; then \
@@ -500,6 +509,7 @@ help:
 	@echo "  test-remote-verify   : Verify test backup completed successfully"
 	@echo "  test-remote-recovery : Test file recovery workflow"
 	@echo "  test-remote-gotify   : Test Gotify notification system (if configured)"
+	@echo "  test-update-gotify   : Update Gotify settings for the test environment"
 	@echo "  test-remote-teardown : Clean up test environment"
 	@echo "  test-remote-clean    : Clean up test environment and snapshots"
 	@echo ""
