@@ -277,11 +277,12 @@ snapshots:
 	@echo "Listing user backup snapshots..."
 	@if [ -f ~/.config/restic/env ]; then \
 		. ~/.config/restic/env && \
-		env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" && \
-		echo "" && \
-		echo "Snapshot sizes:" && \
+		echo "ID        Time                 Host        Tags        Size        Paths" && \
+		echo "-----------------------------------------------------------------------------" && \
 		env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" --json | \
-		jq -r '.[] | (.short_id + ": " + (if .summary.total_size then (if .summary.total_size > 1073741824 then ((.summary.total_size / 1073741824 * 100 | floor) / 100 | tostring) + " GB" elif .summary.total_size > 1048576 then ((.summary.total_size / 1048576 * 100 | floor) / 100 | tostring) + " MB" else ((.summary.total_size / 1024 * 100 | floor) / 100 | tostring) + " KB" end) else "calculating..." end))' && \
+		jq -r '.[] | (.short_id + "  " + (.time[0:19] | sub("T"; " ")) + "  " + (.hostname | .[0:10] + (if length > 10 then "..." else "" end)) + "   " + (.tags[0] // "none" | .[0:8] + (if length > 8 then "..." else "" end)) + "       " + (if .summary.total_size then (if .summary.total_size > 1073741824 then ((.summary.total_size / 1073741824 * 100 | floor) / 100 | tostring) + "GB" elif .summary.total_size > 1048576 then ((.summary.total_size / 1048576 * 100 | floor) / 100 | tostring) + "MB" else ((.summary.total_size / 1024 * 100 | floor) / 100 | tostring) + "KB" end) else "calc..." end) + "   " + (.paths[0] // "")) + (if (.paths | length) > 1 then "\n" + (.paths[1:] | map("                                                                   " + .) | join("\n")) else "" end)' && \
+		echo "-----------------------------------------------------------------------------" && \
+		env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" --json | jq -r 'length | tostring + " snapshots"' && \
 		echo "" && \
 		echo "Repository statistics:" && \
 		env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic stats --repo "$$RESTIC_REPOSITORY"; \
@@ -293,7 +294,7 @@ snapshots:
 snapshots-system:
 	@echo "Listing system backup snapshots..."
 	@if sudo [ -f /root/.restic_env ]; then \
-		sudo bash -c '. /root/.restic_env && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" && echo "" && echo "Snapshot sizes:" && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" --json | jq -r ".[] | (.short_id + \": \" + (if .summary.total_size then (if .summary.total_size > 1073741824 then ((.summary.total_size / 1073741824 * 100 | floor) / 100 | tostring) + \" GB\" elif .summary.total_size > 1048576 then ((.summary.total_size / 1048576 * 100 | floor) / 100 | tostring) + \" MB\" else ((.summary.total_size / 1024 * 100 | floor) / 100 | tostring) + \" KB\" end) else \"calculating...\" end))" && echo "" && echo "Repository statistics:" && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic stats --repo "$$RESTIC_REPOSITORY"'; \
+		sudo bash -c '. /root/.restic_env && echo "ID        Time                 Host        Tags        Size        Paths" && echo "-----------------------------------------------------------------------------" && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" --json | jq -r ".[] | (.short_id + \"  \" + (.time[0:19] | sub(\"T\"; \" \")) + \"  \" + (.hostname | .[0:10] + (if length > 10 then \"...\" else \"\" end)) + \"   \" + (.tags[0] // \"none\" | .[0:8] + (if length > 8 then \"...\" else \"\" end)) + \"       \" + (if .summary.total_size then (if .summary.total_size > 1073741824 then ((.summary.total_size / 1073741824 * 100 | floor) / 100 | tostring) + \"GB\" elif .summary.total_size > 1048576 then ((.summary.total_size / 1048576 * 100 | floor) / 100 | tostring) + \"MB\" else ((.summary.total_size / 1024 * 100 | floor) / 100 | tostring) + \"KB\" end) else \"calc...\" end) + \"   \" + (.paths[0] // \"\")) + (if (.paths | length) > 1 then \"\\n\" + (.paths[1:] | map(\"                                                                   \" + .) | join(\"\\n\")) else \"\" end)" && echo "-----------------------------------------------------------------------------" && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" --json | jq -r "length | tostring + \" snapshots\"" && echo "" && echo "Repository statistics:" && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic stats --repo "$$RESTIC_REPOSITORY"'; \
 	else \
 		echo "Error: System restic not configured. Run 'make setup-system' first."; \
 		exit 1; \
