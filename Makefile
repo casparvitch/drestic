@@ -277,7 +277,10 @@ snapshots:
 	@echo "Listing user backup snapshots..."
 	@if [ -f ~/.config/restic/env ]; then \
 		. ~/.config/restic/env && \
-		env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY"; \
+		env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" && \
+		echo "" && \
+		echo "Repository statistics:" && \
+		env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic stats --repo "$$RESTIC_REPOSITORY"; \
 	else \
 		echo "Error: Restic not configured. Run 'make setup-user' first."; \
 		exit 1; \
@@ -286,7 +289,7 @@ snapshots:
 snapshots-system:
 	@echo "Listing system backup snapshots..."
 	@if sudo [ -f /root/.restic_env ]; then \
-		sudo bash -c '. /root/.restic_env && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY"'; \
+		sudo bash -c '. /root/.restic_env && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" && echo "" && echo "Repository statistics:" && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic stats --repo "$$RESTIC_REPOSITORY"'; \
 	else \
 		echo "Error: System restic not configured. Run 'make setup-system' first."; \
 		exit 1; \
@@ -327,7 +330,7 @@ update-gotify:
 	@if [ -f ~/.config/restic/env ]; then \
 		echo "Updating user scope Gotify settings..."; \
 		./update_gotify.sh ~/.config/restic/env; \
-	elif [ -f /root/.restic_env ]; then \
+	elif sudo [ -f /root/.restic_env ]; then \
 		echo "Updating system scope Gotify settings..."; \
 		sudo ./update_gotify.sh /root/.restic_env; \
 	else \
