@@ -222,7 +222,7 @@ unset RESTIC_PASSWORD # Clear password from shell history
 # Gotify details (optional)
 GOTIFY_URL=""
 GOTIFY_TOKEN=""
-read -rp "Enter your Gotify URL (e.g., https://gotify.example.com, leave blank if not used): " GOTIFY_URL
+read -rp "Enter your Gotify URL (no trailing slash, e.g. https://gotify.example.com, leave blank if not used): " GOTIFY_URL
 if [ -n "$GOTIFY_URL" ]; then
 	validate_url "$GOTIFY_URL"
 	read -rp "Enter your Gotify Application Token: " GOTIFY_TOKEN

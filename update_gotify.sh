@@ -12,7 +12,7 @@ echo "Current Gotify configuration:"
 grep -E "^GOTIFY_(URL|TOKEN)=" "$ENV_FILE" || echo "No Gotify configuration found"
 echo
 
-read -rp "Enter new Gotify URL (leave blank to disable): " GOTIFY_URL
+read -rp "Enter new Gotify URL (no trailing slash, e.g. https://gotify.example.com): " GOTIFY_URL
 if [ -n "$GOTIFY_URL" ]; then
     # Validate URL format
     if [[ ! "$GOTIFY_URL" =~ ^https?:// ]]; then
