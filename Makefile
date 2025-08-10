@@ -46,11 +46,11 @@ install-deps:
 	@if command -v apt >/dev/null 2>&1; then \
 		echo "Using apt package manager"; \
 		sudo apt update; \
-		sudo apt install -y curl git restic shellcheck shfmt unzip; \
+		sudo apt install -y curl git restic shellcheck shfmt unzip jq; \
 		echo "✓ Basic dependencies installed"; \
 	elif command -v yum >/dev/null 2>&1; then \
 		echo "Using yum package manager"; \
-		sudo yum install -y curl git ShellCheck unzip; \
+		sudo yum install -y curl git ShellCheck unzip jq; \
 		echo "✓ Basic dependencies installed (note: shfmt may need manual installation)"; \
 		echo "Installing restic separately..."; \
 		if ! command -v restic >/dev/null 2>&1; then \
@@ -62,11 +62,11 @@ install-deps:
 		fi; \
 	elif command -v pacman >/dev/null 2>&1; then \
 		echo "Using pacman package manager"; \
-		sudo pacman -S --noconfirm curl git restic shellcheck shfmt unzip; \
+		sudo pacman -S --noconfirm curl git restic shellcheck shfmt unzip jq; \
 		echo "✓ Basic dependencies installed"; \
 	elif command -v zypper >/dev/null 2>&1; then \
 		echo "Using zypper package manager"; \
-		sudo zypper install -y curl git restic ShellCheck shfmt unzip; \
+		sudo zypper install -y curl git restic ShellCheck shfmt unzip jq; \
 		echo "✓ Basic dependencies installed"; \
 	else \
 		echo "❌ No supported package manager found (apt/yum/pacman/zypper)"; \
@@ -281,7 +281,7 @@ snapshots:
 		echo "" && \
 		echo "Snapshot sizes:" && \
 		env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" --json | \
-		jq -r '.[] | "\(.short_id): \(if .summary.total_size then (.summary.total_size | if . > 1073741824 then "\(. / 1073741824 * 100 | floor / 100) GB" elif . > 1048576 then "\(. / 1048576 * 100 | floor / 100) MB" else "\(. / 1024 * 100 | floor / 100) KB" end) else "calculating..." end)"' && \
+		jq -r '.[] | (.short_id + ": " + (if .summary.total_size then (if .summary.total_size > 1073741824 then ((.summary.total_size / 1073741824 * 100 | floor) / 100 | tostring) + " GB" elif .summary.total_size > 1048576 then ((.summary.total_size / 1048576 * 100 | floor) / 100 | tostring) + " MB" else ((.summary.total_size / 1024 * 100 | floor) / 100 | tostring) + " KB" end) else "calculating..." end))' && \
 		echo "" && \
 		echo "Repository statistics:" && \
 		env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic stats --repo "$$RESTIC_REPOSITORY"; \
@@ -293,7 +293,7 @@ snapshots:
 snapshots-system:
 	@echo "Listing system backup snapshots..."
 	@if sudo [ -f /root/.restic_env ]; then \
-		sudo bash -c '. /root/.restic_env && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" && echo "" && echo "Snapshot sizes:" && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" --json | jq -r ".[] | \"\(.short_id): \(if .summary.total_size then (.summary.total_size | if . > 1073741824 then \\\"\(. / 1073741824 * 100 | floor / 100) GB\\\" elif . > 1048576 then \\\"\(. / 1048576 * 100 | floor / 100) MB\\\" else \\\"\(. / 1024 * 100 | floor / 100) KB\\\" end) else \\\"calculating...\\\" end)\"" && echo "" && echo "Repository statistics:" && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic stats --repo "$$RESTIC_REPOSITORY"'; \
+		sudo bash -c '. /root/.restic_env && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" && echo "" && echo "Snapshot sizes:" && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic snapshots --repo "$$RESTIC_REPOSITORY" --json | jq -r ".[] | (.short_id + \": \" + (if .summary.total_size then (if .summary.total_size > 1073741824 then ((.summary.total_size / 1073741824 * 100 | floor) / 100 | tostring) + \" GB\" elif .summary.total_size > 1048576 then ((.summary.total_size / 1048576 * 100 | floor) / 100 | tostring) + \" MB\" else ((.summary.total_size / 1024 * 100 | floor) / 100 | tostring) + \" KB\" end) else \"calculating...\" end))" && echo "" && echo "Repository statistics:" && env RESTIC_PASSWORD_FILE="$$RESTIC_PASSWORD_FILE" restic stats --repo "$$RESTIC_REPOSITORY"'; \
 	else \
 		echo "Error: System restic not configured. Run 'make setup-system' first."; \
 		exit 1; \

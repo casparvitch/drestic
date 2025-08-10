@@ -54,10 +54,10 @@ Clone and setup (for user install)
    make install-deps
    
    # OR manual installation if make install-deps doesn't work:
-   # Ubuntu/Debian: sudo apt install curl git restic unzip && curl https://rclone.org/install.sh | sudo bash
-   # RHEL/CentOS:   sudo yum install curl git unzip && sudo yum install restic && curl https://rclone.org/install.sh | sudo bash
-   # Arch Linux:    sudo pacman -S curl git restic unzip && curl https://rclone.org/install.sh | sudo bash
-   # openSUSE:      sudo zypper install curl git restic unzip && curl https://rclone.org/install.sh | sudo bash
+   # Ubuntu/Debian: sudo apt install curl git restic unzip jq && curl https://rclone.org/install.sh | sudo bash
+   # RHEL/CentOS:   sudo yum install curl git unzip jq && sudo yum install restic && curl https://rclone.org/install.sh | sudo bash
+   # Arch Linux:    sudo pacman -S curl git restic unzip jq && curl https://rclone.org/install.sh | sudo bash
+   # openSUSE:      sudo zypper install curl git restic unzip jq && curl https://rclone.org/install.sh | sudo bash
 
    make setup-user
    
