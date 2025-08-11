@@ -297,6 +297,13 @@ RESTIC_PASSWORD_FILE="$PASS_FILE"
 CONFIG_DIR="$CONFIG_DIR"
 GOTIFY_URL="$GOTIFY_URL"
 GOTIFY_TOKEN="$GOTIFY_TOKEN"
+# Rclone throttling settings to prevent timeout issues during prune operations
+RCLONE_TRANSFERS=1
+RCLONE_CHECKERS=1
+RCLONE_TIMEOUT=7200s
+RCLONE_CONTIMEOUT=600s
+RCLONE_LOW_LEVEL_RETRIES=20
+RCLONE_BWLIMIT=1M
 EOF
 log "Setting permissions for $ENV_FILE to 600"
 chmod 600 "$ENV_FILE" || error "Failed to set permissions on environment file."

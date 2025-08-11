@@ -5,7 +5,7 @@ echo "--- Initializing Restic Backup Script ---"
 
 # Source environment variables if the file exists
 # This script expects RESTIC_ENV_FILE to be set in the environment
-# or to be sourced from a common location.
+# The environment file includes rclone throttling settings to prevent timeouts
 # shellcheck source=/dev/null
 if [ -f "$RESTIC_ENV_FILE" ]; then
 	source "$RESTIC_ENV_FILE"
