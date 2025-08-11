@@ -35,7 +35,7 @@ restic check \
 	--repo "${RESTIC_REPOSITORY}" \
 	--password-file "${RESTIC_PASSWORD_FILE}" \
 	--verbose \
-	--check-data --check-data-percentage 5 || {
+	--read-data-subset 5% || {
 	echo "Error: Restic check failed." >&2
 	exit 1
 }
