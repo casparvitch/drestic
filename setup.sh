@@ -304,6 +304,9 @@ RCLONE_TIMEOUT=7200s
 RCLONE_CONTIMEOUT=600s
 RCLONE_LOW_LEVEL_RETRIES=20
 RCLONE_BWLIMIT=1M
+# Memory optimization for VPS environments
+RESTIC_CACHE_DIR=/tmp/restic-cache
+GOMAXPROCS=1
 EOF
 log "Setting permissions for $ENV_FILE to 600"
 chmod 600 "$ENV_FILE" || error "Failed to set permissions on environment file."

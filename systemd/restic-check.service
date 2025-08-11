@@ -8,6 +8,9 @@ Type=oneshot
 # ExecStart path will be replaced by setup.sh during installation
 ExecStart=/path/to/be/replaced/restic_check.sh
 # Environment variable will be set by setup.sh based on scope
+# Memory limits to prevent OOM on VPS
+MemoryMax=500M
+MemorySwapMax=0
 
 [Install]
 WantedBy=timers.target

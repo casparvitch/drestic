@@ -40,6 +40,7 @@ restic backup \
 	--password-file "${RESTIC_PASSWORD_FILE}" \
 	--tag daily || {
 	echo "Error: Restic backup failed." >&2
+	notify "Restic Backup ($(whoami)@$(hostname))" "Backup phase failed!" 8
 	exit 1
 }
 
@@ -54,18 +55,9 @@ restic forget \
 	--keep-yearly 6 \
 	--prune || {
 	echo "Error: Restic forget/prune failed." >&2
+	notify "Restic Backup ($(whoami)@$(hostname))" "Prune phase failed!" 8
 	exit 1
 }
 
-# Verify the latest snapshot (quick check)
-echo "Performing quick integrity check on the latest snapshot (5% data subset)..."
-restic check \
-	--repo "${RESTIC_REPOSITORY}" \
-	--password-file "${RESTIC_PASSWORD_FILE}" \
-	--read-data-subset 5% \
-	--verbose || {
-	echo "Error: Restic check failed." >&2
-	exit 1
-}
 
 echo "--- Restic Backup finished at $(date) ---"

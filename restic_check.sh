@@ -30,13 +30,15 @@ trap 'notify "Restic Check" "Restic check script finished with exit code $?" $?'
 # --- Main Logic ---
 echo "--- Starting Restic Repository Integrity Check at $(date) ---"
 
-echo "Running full integrity check on repository: $RESTIC_REPOSITORY (5% data subset)..."
+echo "Running memory-efficient integrity check on repository: $RESTIC_REPOSITORY (1% data subset)..."
 restic check \
 	--repo "${RESTIC_REPOSITORY}" \
 	--password-file "${RESTIC_PASSWORD_FILE}" \
-	--verbose \
-	--read-data-subset 5% || {
+	--read-data-subset 1% \
+	--no-cache \
+	--verbose || {
 	echo "Error: Restic check failed." >&2
+	notify "Restic Check ($(whoami)@$(hostname))" "Weekly integrity check failed!" 8
 	exit 1
 }
 
