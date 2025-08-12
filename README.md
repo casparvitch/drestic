@@ -260,6 +260,9 @@ Check your paths file and verify the directories exist and are readable.
 **Restore fails:**
 Ensure you have the correct Restic password and MEGA credentials. Test repository access with the snapshots command above.
 
+**Restic repo locked (system setup):**
+- `sudo bash -c 'source /root/.restic_env && restic unlock --repo "$RESTIC_REPOSITORY" --password-file "$RESTIC_PASSWORD_FILE"'`
+
 ### Testing
 
 Run the (local) test suite:
