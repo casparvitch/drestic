@@ -302,8 +302,8 @@ GOGC=20
 # Rclone throttling settings to prevent timeout issues during prune operations
 RCLONE_TRANSFERS=1
 RCLONE_CHECKERS=1
-RCLONE_TIMEOUT=300s
-RCLONE_CONTIMEOUT=300s
+RCLONE_TIMEOUT=7200s
+RCLONE_CONTIMEOUT=600s
 RCLONE_LOW_LEVEL_RETRIES=20
 RCLONE_BWLIMIT=1M
 # Rclone memory optimization settings
