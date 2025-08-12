@@ -297,6 +297,42 @@ snapshots-system:
 		exit 1; \
 	fi
 
+unlock-repo:
+	@echo "=== Unlock Restic Repository ==="
+	@if sudo [ -f /root/.restic_env ]; then \
+		echo "Unlocking system scope repository..."; \
+		sudo bash -c 'source /root/.restic_env && restic unlock --repo "$$RESTIC_REPOSITORY" --password-file "$$RESTIC_PASSWORD_FILE"'; \
+		echo "✓ System repository unlocked"; \
+	elif [ -f ~/.config/restic/env ]; then \
+		echo "Unlocking user scope repository..."; \
+		bash -c 'source ~/.config/restic/env && restic unlock --repo "$$RESTIC_REPOSITORY" --password-file "$$RESTIC_PASSWORD_FILE"'; \
+		echo "✓ User repository unlocked"; \
+	else \
+		echo "Error: No restic configuration found"; \
+		echo "Run 'make setup-user' or 'make setup-system' first"; \
+		exit 1; \
+	fi
+
+unlock-repo-user:
+	@echo "=== Unlock User Restic Repository ==="
+	@if [ -f ~/.config/restic/env ]; then \
+		bash -c 'source ~/.config/restic/env && restic unlock --repo "$$RESTIC_REPOSITORY" --password-file "$$RESTIC_PASSWORD_FILE"'; \
+		echo "✓ User repository unlocked"; \
+	else \
+		echo "Error: User restic not configured. Run 'make setup-user' first."; \
+		exit 1; \
+	fi
+
+unlock-repo-system:
+	@echo "=== Unlock System Restic Repository ==="
+	@if sudo [ -f /root/.restic_env ]; then \
+		sudo bash -c 'source /root/.restic_env && restic unlock --repo "$$RESTIC_REPOSITORY" --password-file "$$RESTIC_PASSWORD_FILE"'; \
+		echo "✓ System repository unlocked"; \
+	else \
+		echo "Error: System restic not configured. Run 'make setup-system' first."; \
+		exit 1; \
+	fi
+
 recover:
 	@echo "=== DRestic Recovery Helper ==="
 	@echo ""
@@ -488,6 +524,9 @@ help:
 	@echo "  status-system    : Show system backup timer status and recent logs"
 	@echo "  snapshots        : List user backup snapshots"
 	@echo "  snapshots-system : List system backup snapshots"
+	@echo "  unlock-repo      : Remove stale repository locks (auto-detects scope)"
+	@echo "  unlock-repo-user : Remove stale locks from user repository"
+	@echo "  unlock-repo-system : Remove stale locks from system repository"
 	@echo "  uninstall-user   : Uninstall user scope DRestic"
 	@echo "  uninstall-system : Uninstall system scope DRestic"
 	@echo "  recover          : Show recovery instructions"
