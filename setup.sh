@@ -297,13 +297,20 @@ RESTIC_PASSWORD_FILE="$PASS_FILE"
 CONFIG_DIR="$CONFIG_DIR"
 GOTIFY_URL="$GOTIFY_URL"
 GOTIFY_TOKEN="$GOTIFY_TOKEN"
+# Go garbage collector optimization for low-memory environments
+GOGC=20
 # Rclone throttling settings to prevent timeout issues during prune operations
 RCLONE_TRANSFERS=1
 RCLONE_CHECKERS=1
-RCLONE_TIMEOUT=7200s
-RCLONE_CONTIMEOUT=600s
+RCLONE_TIMEOUT=300s
+RCLONE_CONTIMEOUT=300s
 RCLONE_LOW_LEVEL_RETRIES=20
 RCLONE_BWLIMIT=1M
+# Rclone memory optimization settings
+RCLONE_BUFFER_SIZE=4M
+RCLONE_USE_MMAP=false
+RCLONE_VFS_CACHE_MODE=off
+RCLONE_MEGA_HARD_DELETE=false
 # Connection reliability settings for intermittent network issues
 RCLONE_RETRIES=10
 RCLONE_RETRIES_SLEEP=30s

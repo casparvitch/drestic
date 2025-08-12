@@ -24,6 +24,26 @@ notify() {
 		>/dev/null 2>&1 || true
 }
 
+# --- Pre-warm rclone connection ---
+echo "Pre-warming rclone connection to MEGA..."
+prewarm_success=false
+for attempt in 1 2 3; do
+    echo "Connection attempt $attempt/3..."
+    if timeout 120 rclone ls backup_remote: >/dev/null 2>&1; then
+        echo "✓ Connection established on attempt $attempt"
+        prewarm_success=true
+        break
+    else
+        echo "✗ Attempt $attempt failed"
+        [ $attempt -lt 3 ] && sleep 30
+    fi
+done
+
+if [ "$prewarm_success" = false ]; then
+    echo "Warning: All pre-warm attempts failed. Check may be slower or fail."
+    notify "Restic Check ($(whoami)@$(hostname))" "Pre-warm connection failed - check may have issues" 6
+fi
+
 # --- Exit Trap ---
 trap 'notify "Restic Check" "Restic check script finished with exit code $?" $?' EXIT
 
