@@ -304,6 +304,9 @@ RCLONE_TIMEOUT=7200s
 RCLONE_CONTIMEOUT=600s
 RCLONE_LOW_LEVEL_RETRIES=20
 RCLONE_BWLIMIT=1M
+# Connection reliability settings for intermittent network issues
+RCLONE_RETRIES=10
+RCLONE_RETRIES_SLEEP=30s
 # Memory optimization for VPS environments
 RESTIC_CACHE_DIR=/tmp/restic-cache
 GOMAXPROCS=1
